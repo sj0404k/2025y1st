@@ -18,7 +18,7 @@ public class TodolistRequest {
     @Setter
     @Getter
     public static class Updatelist{
-        private Long Id;
+        private Long id;
         private String contents;
         private LocalDate date;
     }

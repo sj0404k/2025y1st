@@ -38,14 +38,18 @@ public class TodoListController {
         return toDoListRepository.save(todo);
     }
     //수정
-    @PostMapping
-    public ToDoList UpDate(@RequestBody TodolistRequest.Updatelist request){
-        Optional<ToDoList> optional = Optional.ofNullable(toDoListRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("no id")));
-        ToDoList todo = optional.get();
-        todo.setDoDate(request.getDate());
-        todo.setContents(request.getContents());
-        return toDoListRepository.save(todo);
+    @PostMapping("/update")
+    public ResponseEntity<?> update(@RequestBody TodolistRequest.Updatelist request) {
+        try {
+            ToDoList todo = toDoListRepository.findById(request.getId())
+                    .orElseThrow(() -> new RuntimeException("해당 ID의 할 일이 없습니다."));
+            todo.setContents(request.getContents());
+            todo.setDoDate(request.getDate());
+            return ResponseEntity.ok(toDoListRepository.save(todo));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("에러 발생: " + e.getMessage());
+        }
     }
 
     //전체 조회
