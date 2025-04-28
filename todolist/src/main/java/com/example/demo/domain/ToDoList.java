@@ -26,4 +26,8 @@ public class ToDoList {
     @Column
     private LocalDate doDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id") // ToDoList 테이블에 user_id 컬럼 생성
+    private User user; // 작성한 User
+
 }
