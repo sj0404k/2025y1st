@@ -32,11 +32,12 @@ public class JwtTokenProvider {
 
     // 토큰에서 유저 이메일 추출
     public String getUserEmailFromToken(String token) {
+        String parsedToken = token.replace("Bearer ", "");
         try {
             Claims claims = Jwts.parserBuilder()  // deprecated된 parser() 대신 parserBuilder() 사용
                     .setSigningKey(secretKey.getBytes())  // secretKey를 바이트 배열로 변환하여 사용
                     .build()
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(parsedToken)
                     .getBody();
             return claims.getSubject();  // 이메일
         } catch (ExpiredJwtException e) {
