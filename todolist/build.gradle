@@ -32,13 +32,22 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	implementation'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
-	implementation 'org.springframework.boot:spring-boot-starter-security' //토큰 사용
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+	implementation 'org.springframework.boot:spring-boot-starter-security' // 토큰 사용
 
-	//jwt 라이브러리
+	// jwt 라이브러리
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Jakarta Servlet API 5.x
+	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+
+	// Tomcat 9.x 의존성으로 낮추기
+	runtimeOnly 'org.apache.tomcat.embed:tomcat-embed-core:11.0.3'
+
+	// Spring Security를 위한 추가 의존성 (optional)
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 }
 
 tasks.named('test') {

@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.config.SecurityConfig;
 import com.example.demo.domain.User;
+import com.example.demo.dto.JwtResponse;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtTokenProvider;
@@ -43,20 +44,39 @@ public class LoginController {
         return ResponseEntity.ok("회원가입 완료");
     }
 
-    //로그인
     @PostMapping(value = "/login")
-    public ResponseEntity<String> join(@RequestBody LoginRequest.Login request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest.Login request) {
+        // 이메일로 사용자 찾기
         User foundUser = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("사용자 없음"));
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
+        // 비밀번호 확인
         if (!securityConfig.passwordEncoder().matches(request.getPassword(), foundUser.getPwd())) {
             throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
 
-        String token = jwtTokenProvider.createToken(foundUser.getEmail()); //이메일 기준으로 설정
-        return ResponseEntity.ok(token);
+        // JWT 토큰 생성
+        String token = jwtTokenProvider.createToken(foundUser.getEmail());
+
+        // JWT 토큰을 포함한 응답 반환
+        return ResponseEntity.ok(new JwtResponse(token));
     }
+
+
     //비밀번호 재설정
+        @PostMapping(value = "/reset-password")
+        public ResponseEntity<String> resetPassword(@RequestBody LoginRequest.RePwd request) {
+            // 이메일로 사용자 찾기
+            User foundUser = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+            // 새로운 비밀번호 암호화 후 업데이트
+            String encodedPassword = securityConfig.passwordEncoder().encode(request.getNewPassword());
+            foundUser.setPwd(encodedPassword);
+            userRepository.save(foundUser);
+
+            return ResponseEntity.ok("비밀번호가 성공적으로 재설정되었습니다.");
+        }
 
 
 }

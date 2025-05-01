@@ -11,6 +11,7 @@ public class TodolistRequest {
     @Getter
     @Setter
     public static class Creatlist{
+//        private String em;
         private String contents;
         private LocalDate date;
     }
