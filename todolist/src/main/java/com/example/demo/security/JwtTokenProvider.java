@@ -29,43 +29,33 @@ public class JwtTokenProvider {
                 .signWith(key)
                 .compact();
     }
-
+    // 여기부터 수정
     // 토큰에서 유저 이메일 추출
     public String getUserEmailFromToken(String token) {
         String parsedToken = token.replace("Bearer ", "");
         try {
-            Claims claims = Jwts.parserBuilder()  // deprecated된 parser() 대신 parserBuilder() 사용
-                    .setSigningKey(secretKey.getBytes())  // secretKey를 바이트 배열로 변환하여 사용
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey.getBytes())
                     .build()
                     .parseClaimsJws(parsedToken)
                     .getBody();
             return claims.getSubject();  // 이메일
-        } catch (ExpiredJwtException e) {
-            throw new RuntimeException("JWT 토큰이 만료되었습니다.");
-        } catch (UnsupportedJwtException e) {
-            throw new RuntimeException("지원되지 않는 JWT 토큰입니다.");
-        } catch (Exception e) {
-            throw new RuntimeException("JWT 토큰 파싱 오류");
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
+            // ✅ 더 이상 예외를 던지지 않고 null 반환
+            return null;
         }
     }
+
 
     // 토큰 유효성 검증
     public boolean validateToken(String token) {
         try {
-            // 토큰이 만료되었는지, 서명이 유효한지 확인
             Jwts.parserBuilder()
-                    .setSigningKey(secretKey.getBytes())  // secretKey를 바이트 배열로 변환하여 사용
+                    .setSigningKey(secretKey.getBytes())
                     .build()
-                    .parseClaimsJws(token);  // 유효하지 않으면 예외 발생
+                    .parseClaimsJws(token);
             return true;
-        } catch (ExpiredJwtException e) {
-            // 만료된 토큰
-            return false;
-        } catch (UnsupportedJwtException e) {
-            // 지원되지 않는 JWT 토큰
-            return false;
-        } catch (Exception e) {
-            // 기타 예외
+        } catch (JwtException e) {
             return false;
         }
     }

@@ -34,24 +34,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 토큰이 존재하고 유효한지 확인
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            try {
-                String userEmail = jwtTokenProvider.getUserEmailFromToken(token);  // 토큰에서 유저 이메일 추출
-                // 유저 정보 설정 (이메일로 사용자 인증)
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userEmail, null, new ArrayList<>());
-                SecurityContextHolder.getContext().setAuthentication(authentication);  // 인증 정보 설정
-            } catch (Exception e) {
-                // 예외 처리: 토큰이 잘못된 경우 로그를 남기고 Unauthorized 상태 코드 응답
-                logger.error("JWT 토큰 처리 오류: {}");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                return;  // 필터 체인의 나머지 처리 안 함
+            String userEmail = jwtTokenProvider.getUserEmailFromToken(token);
+
+            if (userEmail == null) {
+                // ✅ 토큰은 있지만 만료되었거나 유효하지 않음 → 401 응답
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 만료되었거나 유효하지 않습니다.");
+                return;
             }
+
+            // ✅ 인증 정보 설정
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userEmail, null, new ArrayList<>());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
-            // 토큰이 없거나 유효하지 않으면 필터 체인의 나머지 처리를 계속 진행
+            // ❗ 유효하지 않거나 없는 경우 경고만 찍고 필터 통과 (필요에 따라 변경 가능)
             logger.warn("JWT 토큰이 없거나 유효하지 않음");
         }
 
-        filterChain.doFilter(request, response);  // 필터 체인 진행
+        filterChain.doFilter(request, response);
     }
 
     // Authorization 헤더에서 "Bearer" 토큰을 추출하는 메서드

@@ -31,7 +31,7 @@ public class ToDoListRequest {
     @Setter
     @Getter
     public static class CheckBox{
-        private Long Id;
+        private Long id;
         private Boolean isCheck;
     }
 
